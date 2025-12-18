@@ -9,7 +9,7 @@ A BINGO number generator for Arduino UNO R4 WiFi using the built-in 12x8 LED mat
 - Visual effects with blinking transitions
 - LED warning indicator before number changes
 - Scrolling text animations
-- Multilingual end message
+- Multilingual end message with drawn numbers
 
 ## 📟 Hardware Required
 
