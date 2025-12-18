@@ -10,17 +10,23 @@ byte frame[8][12];
 const int LED_PIN = 13;
 
 // Timing constants (in milliseconds)
-const unsigned long DISPLAY_TIME = 13000;    // 28 seconds display
+const unsigned long DISPLAY_TIME = 13000;    // 13 seconds display
 const unsigned long BLANK_TIME = 3000;       // 3 seconds blank
 const unsigned long FADE_IN_TIME = 5000;     // 5 seconds fade in (slow to fast blink)
 const unsigned long FADE_OUT_TIME = 5000;    // 5 seconds fade out (fast to slow blink)
 const unsigned long LED_WARNING_TIME = 5000; // 5 seconds LED warning before end
 
+
 // Array to track used numbers
 bool usedNumbers[76];  // Index 1-75 used, index 0 unused
+int drawnNumbers[75];  // Store numbers in order they were drawn
+int drawCount = 0;     // How many numbers have been drawn
 int numbersRemaining = 75;
 int currentNumber = 0;
 bool gameFinished = false;
+
+// End message with numbers
+String endMessage;
 
 void setup() {
   matrix.begin();
@@ -58,7 +64,7 @@ void loop() {
     return;
   }
   
-  // Phase 1: Display number for 28 seconds with effects
+  // Phase 1: Display number for 13 seconds with effects
   displayNumberWithEffects(currentNumber);
   
   // Phase 2: Blank period for 3 seconds with slow LED blinking
@@ -66,6 +72,9 @@ void loop() {
   
   // Check if all numbers have been used
   if (numbersRemaining == 0) {
+    // Build end message with all drawn numbers
+    buildEndMessage();
+    
     // Set game as finished - will loop end scroll forever
     gameFinished = true;
     return;
@@ -86,6 +95,10 @@ int getNextNumber() {
   
   usedNumbers[num] = true;
   numbersRemaining--;
+  
+  // Store the number in draw order
+  drawnNumbers[drawCount] = num;
+  drawCount++;
   
   return num;
 }
@@ -143,19 +156,34 @@ void blinkLEDStart() {
   }
 }
 
+void buildEndMessage() {
+  // Start with multilingual end message
+  endMessage = "koniec.... end.... Ende.... fin.... fine.... fim.... Numbers drawn: ";
+  
+  // Add all drawn numbers in order
+  for (int i = 0; i < 75; i++) {
+    endMessage += String(drawnNumbers[i]);
+    if (i < 74) {
+      endMessage += " - ";
+    }
+  }
+  
+  endMessage += " ....";
+}
+
 void showEndScroll() {
-  // Scroll the multilingual end message
+  // Scroll the end message with numbers
   matrix.beginDraw();
   matrix.stroke(0xFFFFFFFF);
-  matrix.textScrollSpeed(80);
+  matrix.textScrollSpeed(60);
   matrix.textFont(Font_5x7);
   matrix.beginText(12, 1, 0xFFFFFF);
-  matrix.println("koniec.... end.... Ende.... fin.... fin.... fine.... fim.... konec....");
+  matrix.println(endMessage);
   matrix.endText(SCROLL_LEFT);
   matrix.endDraw();
   
   // Wait for scroll to complete before repeating
-  delay(15000);
+  delay(45000);
 }
 
 void displayNumberWithEffects(int num) {
